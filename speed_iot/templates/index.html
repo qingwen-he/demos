@@ -6,17 +6,17 @@ API Store GroSkill Workshop
 <div class="container">
   <h1>Welcome to the GroSkill Workshop</h1>
   <p>We are going to use this page to do the workshop</p>
+
+{% if data %}
   {% if data.sms %}
   <div class="alert alert-success" role="alert">
     We notified our cube that you hit an address with Fiber
   </div>
+  {% elif data.error %}
+  <div class="alert alert-danger" role="alert">
+    Error reason: {{data.error.error.name}}
+  </div>
   {% endif %}
-</div>
-
-{% if data %}
-  {% if data.error %}
-  <p>Error reason: {{data.error.name}}</p>
-  {% else %}
   <div class="jumbotron jumbotron-fluid">
     <div class="container">
       <h1 class="display-4">Access Token</h1>
@@ -31,40 +31,38 @@ API Store GroSkill Workshop
       <form action="/check_service" method="POST">
         <div class="row">
           <div class="col">
-              <label for="postcode">Postcode:</label>
+            <label for="postcode">Postcode:</label>
           </div>
           <div class="col">
-              <input name="postcode" id="postcode">
-          </div>
-        </div>
-        <div class="row">
-          <div class="col">
-              <label for="house_number">House Number:</label>
-          </div>
-          <div class="col">
-              <input name="house_number" id="house_number">
+            <input name="postcode" id="postcode">
           </div>
         </div>
         <div class="row">
           <div class="col">
-              <label for="house_extension">House extension:</label>
+            <label for="house_number">House Number:</label>
           </div>
           <div class="col">
-              <input name="house_extension" id="house_extension">
+            <input name="house_number" id="house_number">
+          </div>
+        </div>
+        <div class="row">
+          <div class="col">
+            <label for="house_extension">House extension:</label>
+          </div>
+          <div class="col">
+            <input name="house_extension" id="house_extension">
           </div>
         </div>
         <input type="hidden" name="accesstoken" id="accesstoken" value="{{data.access_token}}">
         <input type="hidden" name="clientid" id="clientid" value="{{data.input.client_id}}">
         <input type="hidden" name="clientsecret" id="clientsecret" value="{{data.input.client_secret}}">
-        <div class="row">
-          {% if data.internet %}
-          <button type="submit" class="btn btn-primary">Check new address</button>
-          {% else %}
-          <button type="submit" class="btn btn-primary">Check available technologies</button>
-          {% endif %}
-        </div>
-      </form> 
-      {% if data.internet %}
+        {% if data.internet %}
+        <button type="submit" class="btn btn-primary">Check new address</button>
+        {% else %}
+        <button type="submit" class="btn btn-primary">Check available technologies</button>
+        {% endif %}
+      </form>
+      {% if data.internet and not data.error %}
       <table class="table">
         <thead>
           <tr>
@@ -87,33 +85,32 @@ API Store GroSkill Workshop
 
     </div>
   </div>
-  
-  {% endif %}
 {% else %}
-<div class="jumbotron jumbotron-fluid">
-  <div class="container">
-    <h1 class="display-4">Get Access Token for the first time</h1>
-    <form action="/authenticate" method="POST">
-      <div class="row">
-        <div class="col">
+  <div class="jumbotron jumbotron-fluid">
+    <div class="container">
+      <h1 class="display-4">Get Access Token for the first time</h1>
+      <form action="/authenticate" method="POST">
+        <div class="row">
+          <div class="col">
             <label for="clientid">Client ID:</label>
-        </div>
-        <div class="col">
+          </div>
+          <div class="col">
             <input name="clientid" id="clientid">
+          </div>
         </div>
-      </div>
-      <div class="row">
-        <div class="col">
+        <div class="row">
+          <div class="col">
             <label for="clientsecret">Client Secret:</label>
-        </div>
-        <div class="col">
+          </div>
+          <div class="col">
             <input name="clientsecret" id="clientsecret">
+          </div>
         </div>
-      </div>
-      <div class="row">
-        <button type="submit" class="btn btn-primary">Get access token</button>
-      </div>
-    </form> 
+        <div class="row">
+          <button type="submit" class="btn btn-primary">Get access token</button>
+        </div>
+      </form>
+    </div>
   </div>
 </div>
 {% endif %}

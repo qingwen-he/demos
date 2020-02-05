@@ -12,12 +12,15 @@ def get_root_page():
     """
     return render_template('index.html')
 
+
 """
 Calls used by the forms
 """
 @app.route('/authenticate', methods=['POST'])
 def authenticate():
-    response = get_access_token()
+    response, status = get_access_token()
+    if status != 200:
+        response['error'] = response
     return render_template("index.html", data=response)
 
 
@@ -31,9 +34,11 @@ def check_address():
         client_id=request.form['clientid'], client_secret=request.form['clientsecret']))
     speed_response, status = call_speed_test_api()
     general_response['internet'] = speed_response
-    if fiber_available(speed_response):
+    if status == 200 and fiber_available(speed_response):
         sms_response, status = send_sms()
-        general_response['sms'] = sms_response,
+        general_response['sms'] = sms_response
+    else:
+        general_response['error'] = speed_response
     return render_template('index.html', data=general_response)
 
 
@@ -59,7 +64,7 @@ def get_access_token():
     )
     response = data.json()
     response['input'] = payload
-    return response
+    return response, data.status_code
 
 
 def call_speed_test_api():
@@ -85,7 +90,7 @@ def send_sms():
     """
     Sends SMS using KPN SMS API
     """
-    url = "https://api-prd.kpn.com/messaging/sms-kpn/v1/send"
+     url = "https://api-prd.kpn.com/messaging/sms-kpn/v1/send"
     payload = {
         "sender": "KPN API",
         "messages": [{
@@ -99,13 +104,12 @@ def send_sms():
     data = requests.post(url, data=json.dumps(payload), headers=headers)
     return data.json(), data.status_code
 
-
 def fiber_available(response):
     """
     Checks if fiber is in the input response
     """
     has_fiber = [True for tech in response['available_on_address']
-             ['technologies'] if tech['name'].lower() == "fiber"]
+                 ['technologies'] if tech['name'].lower() == "fiber"]
     return True if True in has_fiber else False
 
 
